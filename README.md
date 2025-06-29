@@ -1,19 +1,19 @@
-Absolutely — here's a professional, Raspberry-Pi-optimized `README.md` file tailored to your exact face recognition attendance system project.
-
----
-
 ### ✅ `README.md`
 
 ```markdown
-# 🎓 Raspberry Pi Face Recognition Attendance System
+# 🚗 Face Recognition Car Control with Arduino and Raspberry Pi
 
-This project is a lightweight **face recognition-based attendance system** designed to run efficiently on a **Raspberry Pi** using **OpenCV** and **Python**.
+This project is a smart **car control system** that uses **face recognition** to authenticate a driver before enabling vehicle operation. Built using a **Raspberry Pi**, **Arduino**, and **OpenCV**, it integrates hardware and software to enhance security and automation.
 
-It allows you to:
-- 🧑‍💻 Register new users by capturing face data
-- 🧠 Train a recognition model
-- 🧾 Automatically log attendance into a `.csv` file with timestamp
-- 🖥️ Use a USB or Pi camera to interact live with the system
+---
+
+## 🔧 Features
+
+- 👤 Face authentication via live camera feed
+- 🔒 Car ignition only allowed on successful recognition
+- 🔌 Arduino-controlled relay module or motor driver
+- 📷 Raspberry Pi camera or USB webcam support
+- 🧠 Trained model using OpenCV's LBPH face recognizer
 
 ---
 
@@ -21,17 +21,21 @@ It allows you to:
 
 ```
 
-Face-Recognition-Attendance-System/
+Face-Recognition-Car-Control/
 │
-├── Raspberry Pi files/
-│   ├── Main.py                   # Main driver script (menu interface)
-│   ├── Dataset.py                # Captures and stores face images
+├── RaspberryPi/
+│   ├── Main.py                # Main script handling face recognition
+│   ├── Dataset.py             # Captures user face data
+│   ├── TrainModel.py          # Trains the face recognition model
+│   ├── car\_control.py         # Sends command to Arduino to unlock/lock
 │   ├── haarcascade\_frontalface\_default.xml
 │
-├── Dataset/                      # Folder where face images are saved
-├── TrainingImageLabel/          # Folder where trained model is stored
-├── Attendance/                  # Folder where attendance CSVs are saved
-├── names.txt                    # ID-to-name mapping
+├── Dataset/                   # Stores captured face images
+├── TrainedModel/              # Contains the trained face recognition model
+├── Arduino/
+│   ├── CarControl.ino         # Arduino code for relay/motor control
+│
+├── names.txt                  # ID-name mapping
 
 ````
 
@@ -39,15 +43,15 @@ Face-Recognition-Attendance-System/
 
 ## ⚙️ Requirements
 
-Ensure the following are installed on your **Raspberry Pi OS**:
+Install these on your **Raspberry Pi**:
 
 ```bash
 sudo apt update
-sudo apt install python3-pip python3-opencv libatlas-base-dev -y
-pip3 install numpy pandas
+sudo apt install python3-opencv python3-serial libatlas-base-dev -y
+pip3 install numpy pandas pyserial
 ````
 
-If using OpenCV on low-RAM systems:
+To improve OpenCV performance on headless Pi setups:
 
 ```bash
 pip3 install opencv-contrib-python-headless
@@ -55,88 +59,88 @@ pip3 install opencv-contrib-python-headless
 
 ---
 
-## 📸 Camera Setup
+## 🔌 Hardware Setup
 
-You can use:
+* ✅ Raspberry Pi 3/4 (with Raspbian OS)
+* ✅ Arduino Uno/Nano
+* ✅ USB or Pi Camera Module
+* ✅ Relay module or motor driver (for car control)
+* ✅ Jumper wires & breadboard
 
-* USB Webcam (default index `0`)
-* Or Raspberry Pi Camera Module (enable via `sudo raspi-config`)
-
-If using the Pi camera:
-
-```bash
-cam = cv2.VideoCapture(0, cv2.CAP_V4L2)
-```
+**Connection Flow:**
+Raspberry Pi ↔ Arduino (via USB Serial) → Relay Module → Car Ignition Line (or Simulation)
 
 ---
 
 ## 🚀 How to Run
 
-### Step 1: Launch the System
+### 1. Collect Face Data
 
 ```bash
-cd "Raspberry Pi files"
+cd RaspberryPi
+python3 Dataset.py
+```
+
+### 2. Train the Model
+
+```bash
+python3 TrainModel.py
+```
+
+### 3. Start the System
+
+```bash
 python3 Main.py
 ```
 
-### Step 2: Use Menu Options
-
-```
-[1] Check Camera               → Tests camera feed
-[2] Capture Faces              → Takes 30 samples per user
-[3] Train Images               → Trains a model using saved faces
-[4] Recognize & Attendance     → Logs recognized faces to CSV
-[5] Quit                       → Exit system
-```
+> Once a face is recognized, `car_control.py` sends a serial command to Arduino to engage the car system.
 
 ---
 
-## 📝 How Attendance Works
+## 🛠️ Arduino Sketch (CarControl.ino)
 
-* Attendance is saved as:
-  `Attendance/attendance_YYYY-MM-DD.csv`
+```cpp
+void setup() {
+  Serial.begin(9600);
+  pinMode(8, OUTPUT); // Relay connected to pin 8
+}
 
-* Each entry includes:
-
-  * Time of recognition
-  * User ID
-  * Name (from `names.txt`)
-
-* Duplicates are avoided:
-  A user won't be logged again within 10 seconds.
-
----
-
-## 🛠️ Developer Notes
-
-* Haarcascade model is used for face detection (`haarcascade_frontalface_default.xml`)
-* `LBPHFaceRecognizer` is used for training and prediction
-* Training images are stored in `Dataset/` as `{ID}_{number}.jpg`
-* Trained model is stored in `TrainingImageLabel/Trainner.yml`
+void loop() {
+  if (Serial.available()) {
+    char command = Serial.read();
+    if (command == '1') {
+      digitalWrite(8, HIGH); // Turn ON car (relay)
+    } else if (command == '0') {
+      digitalWrite(8, LOW);  // Turn OFF car
+    }
+  }
+}
+```
 
 ---
 
 ## 💡 Future Improvements
 
-* Export to Google Sheets or Firebase
-* Email summary after each day
-* Add GUI with Tkinter or PyQt
-* Auto-start script on boot (using `crontab` or systemd)
+* Voice confirmation or dual-factor unlock
+* Remote monitoring via Firebase or MQTT
+* Android control panel or dashboard app
+* Add license plate recognition module
 
 ---
 
 ## 🤝 Contributors
 
-* **Oluwatoyin Ifeoluwa Faith** – Developer, Designer, and Tester
+* **Oluwatoyin Ifeoluwa Faith** – Developer, Designer, and Embedded Systems Integrator
 
 ---
 
 ## 📜 License
 
-This project is open-source and free to use for educational and non-commercial purposes.
+This project is open-source and provided under the MIT License. Use it freely for personal or academic projects.
 
 ```
 
 ---
 
+Let me know if you want a badge section, images, or wiring diagrams included too!
 ```
